@@ -3,7 +3,7 @@ package updates
 import (
 	"github.com/zytekaron/gotil/v2/optional"
 	"github.com/zytekaron/zog-server/src/types"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type Log struct {

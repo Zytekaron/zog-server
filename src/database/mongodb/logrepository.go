@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"github.com/zytekaron/zog-server/src/config"
 	"github.com/zytekaron/zog-server/src/database"
 	"github.com/zytekaron/zog-server/src/types"
 	"github.com/zytekaron/zog-server/src/types/find"
@@ -12,19 +11,17 @@ import (
 )
 
 type LogRepository struct {
-	db   *mongo.Database
 	logs *mongo.Collection
 }
 
-func NewLogRepository(db *mongo.Database, dbCfg *config.MongoDB) database.LogController {
+func NewLogRepository(logs *mongo.Collection) database.Controller[*types.Log] {
 	return &LogRepository{
-		db:   db,
-		logs: db.Collection(dbCfg.LogCollection),
+		logs: logs,
 	}
 }
 
-func (l *LogRepository) Insert(ctx context.Context, msg *types.Log) error {
-	_, err := l.logs.InsertOne(ctx, msg)
+func (l *LogRepository) Insert(ctx context.Context, log *types.Log) error {
+	_, err := l.logs.InsertOne(ctx, log)
 	if mongo.IsDuplicateKeyError(err) {
 		return database.ErrDuplicateKey
 	}
@@ -44,7 +41,7 @@ func (l *LogRepository) Get(ctx context.Context, id string) (*types.Log, error) 
 	return user, nil
 }
 
-func (l *LogRepository) Update(ctx context.Context, id string, updates *updates.Log) error {
+func (l *LogRepository) Update(ctx context.Context, id string, updates updates.Updates[*types.Log]) error {
 	res, err := l.logs.UpdateOne(ctx, bson.M{"_id": id}, updates.MongoQuery())
 	if err != nil {
 		return err
@@ -68,7 +65,7 @@ func (l *LogRepository) Count(ctx context.Context) (int64, error) {
 	return l.logs.CountDocuments(ctx, bson.M{})
 }
 
-func (l *LogRepository) Find(ctx context.Context, query *find.LogQuery, options *find.LogOptions) (database.Iterator[*types.Log], error) {
+func (l *LogRepository) Find(ctx context.Context, query find.Query[*types.Log], options find.Options[*types.Log]) (database.Iterator[*types.Log], error) {
 	cursor, err := l.logs.Find(ctx, query.MongoQuery(), options.MongoOptions())
 	if err != nil {
 		return nil, err

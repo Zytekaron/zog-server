@@ -7,6 +7,7 @@ import (
 	"github.com/zytekaron/zog-server/src/database/cache"
 	"github.com/zytekaron/zog-server/src/database/mongodb"
 	"github.com/zytekaron/zog-server/src/server"
+	"github.com/zytekaron/zog-server/src/types"
 	"log"
 	"time"
 )
@@ -17,8 +18,8 @@ var configDirs = []string{
 }
 
 var cfg *config.Config
-var lc database.LogController
-var tc database.TokenController
+var lc database.Controller[*types.Log]
+var tc database.Controller[*types.Token]
 
 func init() {
 	var err error
@@ -35,8 +36,8 @@ func init() {
 		client := try(mongodb.NewClient(ctx, cfg.Database.MongoDB))
 		db := client.Database(cfg.Database.MongoDB.Database)
 
-		lc = mongodb.NewLogRepository(db, cfg.Database.MongoDB)
-		tc = mongodb.NewTokenRepository(db, cfg.Database.MongoDB)
+		lc = mongodb.NewLogRepository(db.Collection(cfg.Database.MongoDB.LogCollection))
+		tc = mongodb.NewTokenRepository(db.Collection(cfg.Database.MongoDB.TokenCollection))
 		tc = cache.NewTokenCache(tc, cfg.Cache.Tokens)
 	default:
 		log.Fatal("invalid config option: db.use (expected one of: mongodb)")

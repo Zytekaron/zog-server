@@ -5,15 +5,16 @@ import (
 	"github.com/zytekaron/zog-server/src/config"
 	"github.com/zytekaron/zog-server/src/database"
 	"github.com/zytekaron/zog-server/src/server/middleware"
+	"github.com/zytekaron/zog-server/src/types"
 )
 
 type LogHandler struct {
 	Config *config.Config
-	Logs   database.LogController
-	Tokens database.TokenController
+	Logs   database.Controller[*types.Log]
+	Tokens database.Controller[*types.Token]
 }
 
-func New(cfg *config.Config, tc database.TokenController, lc database.LogController) *LogHandler {
+func New(cfg *config.Config, lc database.Controller[*types.Log], tc database.Controller[*types.Token]) *LogHandler {
 	return &LogHandler{
 		Config: cfg,
 		Logs:   lc,

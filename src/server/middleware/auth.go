@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func Auth(tc database.TokenController, mode string) func(*gin.Context) {
+func Auth(tc database.Controller[*types.Token], mode string) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		authorization := ctx.GetHeader("Authorization")
 		if authorization == "" {

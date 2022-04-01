@@ -5,17 +5,18 @@ import (
 	"github.com/zyedidia/generic/cache"
 	"github.com/zytekaron/zog-server/src/database"
 	"github.com/zytekaron/zog-server/src/types"
+	"github.com/zytekaron/zog-server/src/types/find"
 	"github.com/zytekaron/zog-server/src/types/updates"
 	"sync"
 )
 
 type TokenCache struct {
-	supplier database.TokenController
+	supplier database.Controller[*types.Token]
 	cache    *cache.Cache[string, *types.Token]
 	cacheMux sync.Mutex
 }
 
-func NewTokenCache(supplier database.TokenController, cacheSize int) *TokenCache {
+func NewTokenCache(supplier database.Controller[*types.Token], cacheSize int) *TokenCache {
 	return &TokenCache{
 		supplier: supplier,
 		cache:    cache.New[string, *types.Token](cacheSize),
@@ -50,7 +51,7 @@ func (t *TokenCache) Get(ctx context.Context, id string) (*types.Token, error) {
 	return token, nil
 }
 
-func (t *TokenCache) Update(ctx context.Context, id string, updates *updates.Token) error {
+func (t *TokenCache) Update(ctx context.Context, id string, updates updates.Updates[*types.Token]) error {
 	err := t.supplier.Update(ctx, id, updates)
 	if err != nil {
 		return err
@@ -71,6 +72,14 @@ func (t *TokenCache) Delete(ctx context.Context, id string) error {
 
 	t.syncRemove(id)
 	return nil
+}
+
+func (t *TokenCache) Count(ctx context.Context) (int64, error) {
+	return t.supplier.Count(ctx)
+}
+
+func (t *TokenCache) Find(ctx context.Context, query find.Query[*types.Token], options find.Options[*types.Token]) (database.Iterator[*types.Token], error) {
+	return t.supplier.Find(ctx, query, options)
 }
 
 func (t *TokenCache) SetSize(size int) {
