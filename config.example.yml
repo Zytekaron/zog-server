@@ -1,0 +1,19 @@
+# The configuration for where to host the server
+# SSL/TLS is not supported; proxy through cloudflare or modify the code
+server:
+  domain: 'log.example.com'
+  addr: ':80'
+
+# The database credentials for the chosen database
+# MongoDB is the only supported database for now
+db:
+  use: 'mongodb'
+  mongodb:
+    uri: 'mongodb+srv://***:***@***.mongodb.net/***?retryWrites=true&w=majority'
+    database: 'production'
+    log_collection: 'logs'
+    token_collection: 'tokens'
+
+# Caching configuration
+cache:
+  tokens: 10_000
