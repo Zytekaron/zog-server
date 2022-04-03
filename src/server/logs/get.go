@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (l *LogHandler) Get() func(*gin.Context) {
+func (l *LogHandler) Get() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
@@ -23,7 +23,7 @@ func (l *LogHandler) Get() func(*gin.Context) {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			log.Println("error getting document:", err)
 			ctx.JSON(http.StatusInternalServerError, types.NewErrorNil("an error occurred fetching the document"))
 			return
 		}

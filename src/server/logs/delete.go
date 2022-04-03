@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (l *LogHandler) Delete() func(*gin.Context) {
+func (l *LogHandler) Delete() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		id := ctx.Param("id")
 
@@ -23,8 +23,8 @@ func (l *LogHandler) Delete() func(*gin.Context) {
 			return
 		}
 		if err != nil {
-			log.Println(err)
-			ctx.JSON(http.StatusBadRequest, types.NewErrorNil("an error occurred fetching the document"))
+			log.Println("error deleting document:", err)
+			ctx.JSON(http.StatusBadRequest, types.NewErrorNil("an error occurred deleting the document"))
 			return
 		}
 

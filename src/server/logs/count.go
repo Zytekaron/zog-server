@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func (l *LogHandler) Count() func(*gin.Context) {
+func (l *LogHandler) Count() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		c, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 
 		count, err := l.Logs.Count(c)
 		if err != nil {
-			log.Println(err)
+			log.Println("error counting documents:", err)
 			ctx.JSON(http.StatusInternalServerError, types.NewErrorNil("an error occurred counting documents"))
 			return
 		}

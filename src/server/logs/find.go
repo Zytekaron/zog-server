@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func (l *LogHandler) Find() func(*gin.Context) {
+func (l *LogHandler) Find() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var query *find.LogQuery
 		err := json.NewDecoder(ctx.Request.Body).Decode(&query)
@@ -45,14 +45,14 @@ func (l *LogHandler) Find() func(*gin.Context) {
 
 		iter, err := l.Logs.Find(c, query, options)
 		if err != nil {
-			log.Println(err)
+			log.Println("error finding documents:", err)
 			ctx.JSON(http.StatusInternalServerError, types.NewErrorNil("an error occurred fetching documents"))
 			return
 		}
 
 		entries, err := database.SliceBuf(iter, limit)
 		if iter.Err() != nil {
-			log.Println(err)
+			log.Println("error decoding found documents:", err)
 			ctx.JSON(http.StatusInternalServerError, types.NewErrorNil("an error occurred fetching documents"))
 			return
 		}

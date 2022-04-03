@@ -6,6 +6,7 @@ import (
 	"github.com/zytekaron/zog-server/src/database"
 	"github.com/zytekaron/zog-server/src/server/middleware"
 	"github.com/zytekaron/zog-server/src/types"
+	"time"
 )
 
 type LogHandler struct {
@@ -23,17 +24,17 @@ func New(cfg *config.Config, lc database.Controller[*types.Log], tc database.Con
 }
 
 func (l *LogHandler) Register(r *gin.Engine) {
-	readAuth := middleware.Auth(l.Tokens, "read")
-	writeAuth := middleware.Auth(l.Tokens, "write")
+	auth := middleware.Auth(l.Tokens, 1, time.Second)
 
-	readRateLimit := middleware.RateLimit("read")
-	writeRateLimit := middleware.RateLimit("write")
+	readRL := middleware.RateLimitToken(25, time.Second)
+	r.GET("/:id", auth, readRL, l.Get())
+	r.GET("/count", auth, readRL, l.Count())
 
-	r.GET("/", readAuth, readRateLimit, l.Find())
-	r.GET("/:id", readAuth, readRateLimit, l.Get())
-	r.GET("/count", readAuth, readRateLimit, l.Count())
+	batchRL := middleware.RateLimitToken(5, time.Second)
+	r.GET("/", auth, batchRL, l.Find())
 
-	r.POST("/", writeAuth, writeRateLimit, l.Insert())
-	r.PATCH("/:id", writeAuth, writeRateLimit, l.Update())
-	r.DELETE("/:id", writeAuth, writeRateLimit, l.Delete())
+	writeRL := middleware.RateLimitToken(10, time.Second)
+	r.POST("/", auth, writeRL, l.Insert())
+	r.PATCH("/:id", auth, writeRL, l.Update())
+	r.DELETE("/:id", auth, writeRL, l.Delete())
 }

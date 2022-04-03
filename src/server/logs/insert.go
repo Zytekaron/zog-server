@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (l *LogHandler) Insert() func(*gin.Context) {
+func (l *LogHandler) Insert() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var entry *types.Log
 		err := json.NewDecoder(ctx.Request.Body).Decode(&entry)
@@ -33,11 +33,11 @@ func (l *LogHandler) Insert() func(*gin.Context) {
 
 		err = l.Logs.Insert(c, entry)
 		if err == database.ErrDuplicateKey {
-			ctx.JSON(http.StatusBadRequest, types.NewErrorNil("a document with the specified id already exists"))
+			ctx.JSON(http.StatusBadRequest, types.NewErrorNil("a document with this id already exists"))
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			log.Println("error inserting document:", err)
 			ctx.JSON(http.StatusInternalServerError, types.NewErrorNil("an error occurred inserting the document"))
 			return
 		}
